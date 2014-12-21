@@ -25,15 +25,15 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name = 'zope.intid',
-      version='4.0.0a2.dev0',
+      version='4.0.0.dev0',
       author='Albertas Agejevas and Gintautas Miliauskas',
       maintainer='Zope developers',
       maintainer_email='zope-dev@zope.org',
       description='Integer Id Utility',
       long_description=(
-          read('README.txt')
+          read('README.rst')
           + '\n\n' +
-          read('CHANGES.txt')
+          read('CHANGES.rst')
           ),
       keywords = "zope3 integer id utility",
       classifiers = [
