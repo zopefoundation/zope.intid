@@ -78,7 +78,7 @@ class IntIds(Persistent):
     def getId(self, ob):
         try:
             key = IKeyReference(ob)
-        except (NotYet, TypeError):
+        except (NotYet, TypeError, ValueError):
             raise KeyError(ob)
 
         try:

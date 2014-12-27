@@ -14,6 +14,7 @@
 """Tests for the unique id utility.
 """
 import random
+import struct
 import unittest
 
 import BTrees
@@ -82,7 +83,7 @@ class ConnectionStub(object):
 
     def add(self, ob):
         ob._p_jar = self
-        ob._p_oid = self.next
+        ob._p_oid = struct.pack(">I", self.next)
         self.next += 1
 
 
