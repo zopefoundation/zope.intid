@@ -1,28 +1,29 @@
-=======
-CHANGES
+Changes
 =======
 
-4.0.1 (Unreleased)
+4.1.0 (Unreleased)
 ------------------
 
-- TBD
+- Add support for PyPy (PyPy3 blocked on PyPy3-compatible ``zodbpickle``).
+
+- Add support for Python 3.4.
 
 
 4.0.0 (2014-12-20)
 ------------------
 
-- Added support for testing on Travis.
+- Add support for testing on Travis.
 
 
 4.0.0a1 (2013-02-22)
 --------------------
 
-- Added support for Python 3.3.
+- Add support for Python 3.3.
 
-- Replaced deprecated ``zope.interface.implements`` usage with equivalent
+- Replace deprecated ``zope.interface.implements`` usage with equivalent
   ``zope.interface.implementer`` decorator.
 
-- Dropped support for Python 2.4 and 2.5.
+- Drop support for Python 2.4 and 2.5.
 
 - Bug fix: ensure that the IntId utility never generates ids greater
   than the maxint of the BTree family being used.
@@ -32,7 +33,7 @@ CHANGES
 
 - Use the zope.component API in favor of ztapi.
 
-- Removed ``zope.app.testing`` dependency.
+- Remove ``zope.app.testing`` dependency.
 
 3.7.1 (2009-05-18)
 ------------------
