@@ -9,7 +9,8 @@ python:
 #   pypy3 blocked on PyPy3-compatible zodbpickle
 #   - pypy3
 install:
-    - pip install . --use-mirrors
+    - pip install .
+    - pip install zope.intid[test]
 script:
     - python setup.py test -q
 notifications:
