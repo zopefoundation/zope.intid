@@ -123,8 +123,8 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         u = self.createIntIds()
         obj = object()
 
-        self.assert_(u.queryId(obj) is None)
-        self.assert_(u.unregister(obj) is None)
+        self.assertTrue(u.queryId(obj) is None)
+        self.assertTrue(u.unregister(obj) is None)
         self.assertRaises(KeyError, u.getId, obj)
 
     def test(self):
@@ -136,20 +136,20 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         self.assertRaises(KeyError, u.getId, obj)
         self.assertRaises(KeyError, u.getId, P())
 
-        self.assert_(u.queryId(obj) is None)
-        self.assert_(u.queryId(obj, 42) is 42)
-        self.assert_(u.queryId(P(), 42) is 42)
-        self.assert_(u.queryObject(42) is None)
-        self.assert_(u.queryObject(42, obj) is obj)
+        self.assertTrue(u.queryId(obj) is None)
+        self.assertTrue(u.queryId(obj, 42) is 42)
+        self.assertTrue(u.queryId(P(), 42) is 42)
+        self.assertTrue(u.queryObject(42) is None)
+        self.assertTrue(u.queryObject(42, obj) is obj)
 
         uid = u.register(obj)
-        self.assert_(u.getObject(uid) is obj)
-        self.assert_(u.queryObject(uid) is obj)
-        self.assertEquals(u.getId(obj), uid)
-        self.assertEquals(u.queryId(obj), uid)
+        self.assertTrue(u.getObject(uid) is obj)
+        self.assertTrue(u.queryObject(uid) is obj)
+        self.assertEqual(u.getId(obj), uid)
+        self.assertEqual(u.queryId(obj), uid)
 
         uid2 = u.register(obj)
-        self.assertEquals(uid, uid2)
+        self.assertEqual(uid, uid2)
 
         u.unregister(obj)
         self.assertRaises(KeyError, u.getObject, uid)
@@ -167,22 +167,22 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         obj = P()
         conn.add(obj)
         uid = u.register(obj)
-        self.assertEquals(maxint-1, uid)
-        self.assertEquals(maxint, u._v_nextid)
+        self.assertEqual(maxint-1, uid)
+        self.assertEqual(maxint, u._v_nextid)
 
         # The next chosen int is exactly the largest number possible that is
         # delivered by the randint call in the code
         obj = P()
         conn.add(obj)
         uid = u.register(obj)
-        self.assertEquals(maxint, uid)
+        self.assertEqual(maxint, uid)
         # Make an explicit tuple here to avoid implicit type casts
         # by the btree code
         self.failUnless(maxint in tuple(u.refs.keys()))
 
         # _v_nextid is now set to None, since the last id generated was
         # maxint.
-        self.assertEquals(u._v_nextid, None)
+        self.assertEqual(u._v_nextid, None)
         # make sure the next uid generated is less than maxint
         obj = P()
         conn.add(obj)
@@ -195,45 +195,45 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         obj = P()
         obj._p_jar = ConnectionStub()
 
-        self.assertEquals(len(u), 0)
-        self.assertEquals(u.items(), [])
-        self.assertEquals(list(u), [])
+        self.assertEqual(len(u), 0)
+        self.assertEqual(u.items(), [])
+        self.assertEqual(list(u), [])
 
         uid = u.register(obj)
         ref = KeyReferenceToPersistent(obj)
-        self.assertEquals(len(u), 1)
-        self.assertEquals(u.items(), [(uid, ref)])
-        self.assertEquals(list(u), [uid])
+        self.assertEqual(len(u), 1)
+        self.assertEqual(u.items(), [(uid, ref)])
+        self.assertEqual(list(u), [uid])
 
         obj2 = P()
         obj2.__parent__ = obj
 
         uid2 = u.register(obj2)
         ref2 = KeyReferenceToPersistent(obj2)
-        self.assertEquals(len(u), 2)
+        self.assertEqual(len(u), 2)
         result = u.items()
         expected = [(uid, ref), (uid2, ref2)]
         result.sort()
         expected.sort()
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
         result = list(u)
         expected = [uid, uid2]
         result.sort()
         expected.sort()
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
         u.unregister(obj)
         u.unregister(obj2)
-        self.assertEquals(len(u), 0)
-        self.assertEquals(u.items(), [])
+        self.assertEqual(len(u), 0)
+        self.assertEqual(u.items(), [])
 
     def test_getenrateId(self):
         u = self.createIntIds()
-        self.assertEquals(u._v_nextid, None)
+        self.assertEqual(u._v_nextid, None)
         id1 = u._generateId()
-        self.assert_(u._v_nextid is not None)
+        self.assertTrue(u._v_nextid is not None)
         id2 = u._generateId()
-        self.assert_(id1 + 1, id2)
+        self.assertTrue(id1 + 1, id2)
         u.refs[id2 + 1] = "Taken"
         id3 = u._generateId()
         self.assertNotEqual(id3, id2 + 1)
@@ -269,8 +269,8 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         folder = self.root['folder1']['folder1_1']['folder1_1_1']
         id = self.utility.register(folder)
         id1 = self.utility1.register(folder)
-        self.assertEquals(self.utility.getObject(id), folder)
-        self.assertEquals(self.utility1.getObject(id1), folder)
+        self.assertEqual(self.utility.getObject(id), folder)
+        self.assertEqual(self.utility1.getObject(id1), folder)
         setSite(self.folder1_1)
 
         events = []
@@ -289,14 +289,14 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         self.assertRaises(KeyError, self.utility.getObject, id)
         self.assertRaises(KeyError, self.utility1.getObject, id1)
 
-        self.assertEquals(len(events), 1)
-        self.assertEquals(events[0].object, folder)
-        self.assertEquals(events[0].original_event.object, parent_folder)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].object, folder)
+        self.assertEqual(events[0].original_event.object, parent_folder)
 
-        self.assertEquals(len(objevents), 1)
-        self.assertEquals(objevents[0][0], folder)
-        self.assertEquals(objevents[0][1].object, folder)
-        self.assertEquals(objevents[0][1].original_event.object, parent_folder)
+        self.assertEqual(len(objevents), 1)
+        self.assertEqual(objevents[0][0], folder)
+        self.assertEqual(objevents[0][1].object, folder)
+        self.assertEqual(objevents[0][1].original_event.object, parent_folder)
 
     def test_addIntIdSubscriber(self):
         from zope.lifecycleevent import ObjectAddedEvent
@@ -324,20 +324,20 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         id = self.utility.getId(folder)
         id1 = self.utility1.getId(folder)
 
-        self.assertEquals(len(events), 1)
-        self.assertEquals(events[0].original_event.object, parent_folder)
-        self.assertEquals(events[0].object, folder)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].original_event.object, parent_folder)
+        self.assertEqual(events[0].object, folder)
 
-        self.assertEquals(len(objevents), 1)
-        self.assertEquals(objevents[0][1].original_event.object, parent_folder)
-        self.assertEquals(objevents[0][1].object, folder)
-        self.assertEquals(objevents[0][0], folder)
+        self.assertEqual(len(objevents), 1)
+        self.assertEqual(objevents[0][1].original_event.object, parent_folder)
+        self.assertEqual(objevents[0][1].object, folder)
+        self.assertEqual(objevents[0][0], folder)
 
         idmap = events[0].idmap
-        self.assert_(idmap is objevents[0][1].idmap)
-        self.assertEquals(len(idmap), 2)
-        self.assertEquals(idmap[self.utility], id)
-        self.assertEquals(idmap[self.utility1], id1)
+        self.assertTrue(idmap is objevents[0][1].idmap)
+        self.assertEqual(len(idmap), 2)
+        self.assertEqual(idmap[self.utility], id)
+        self.assertEqual(idmap[self.utility1], id1)
 
 class TestIntIds64(TestIntIds):
 
