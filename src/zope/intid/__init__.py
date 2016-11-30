@@ -22,7 +22,7 @@ import random
 
 import BTrees
 from persistent import Persistent
-from zope.component import adapter, getAllUtilitiesRegisteredFor, subscribers
+from zope.component import adapter, getAllUtilitiesRegisteredFor, handle
 from zope.event import notify
 from zope.interface import implementer
 from zope.keyreference.interfaces import IKeyReference, NotYet
@@ -177,6 +177,4 @@ def addIntIdSubscriber(ob, event):
 @adapter(IIntIdEvent)
 def intIdEventNotify(event):
     """Event subscriber to dispatch IntIdEvent to interested adapters."""
-    adapters = subscribers((event.object, event), None)
-    for adapter in adapters:
-        pass # getting them does the work
+    handle(event.object, event)
