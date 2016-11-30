@@ -4,6 +4,12 @@ Changes
 4.2.0 (unreleased)
 ------------------
 
+- Raise more informative KeyError subclasses from the utility when intids
+  or objects cannot be found. This distinguishes them from errors
+  raised by normal dictionaries or BTrees, and is useful in unit
+  testing or when persisting intids or sharing them among processes
+  for later or concurrent use.
+
 - Add support for Python 3.5.
 
 - Drop support for Python 2.6.

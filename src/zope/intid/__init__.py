@@ -34,6 +34,9 @@ from zope.security.proxy import removeSecurityProxy
 
 from zope.intid.interfaces import IIntIds, IIntIdEvent
 from zope.intid.interfaces import IntIdAddedEvent, IntIdRemovedEvent
+from zope.intid.interfaces import IntIdMissingError, IntIdsCorruptedError, ObjectMissingError
+
+
 
 @implementer(IIntIds, IContained)
 class IntIds(Persistent):
@@ -67,7 +70,10 @@ class IntIds(Persistent):
         return self.refs.iterkeys()
 
     def getObject(self, id):
-        return self.refs[id]()
+        try:
+            return self.refs[id]()
+        except KeyError:
+            raise ObjectMissingError(id)
 
     def queryObject(self, id, default=None):
         r = self.refs.get(id)
@@ -79,12 +85,17 @@ class IntIds(Persistent):
         try:
             key = IKeyReference(ob)
         except (NotYet, TypeError, ValueError):
-            raise KeyError(ob)
+            raise IntIdMissingError(ob)
 
         try:
             return self.ids[key]
         except KeyError:
-            raise KeyError(ob)
+            # In theory, if the ZODB and our self.ids BTree is
+            # corrupted, this could raise
+            # ZODB.POSException.POSKeyError, which we should probably
+            # let propagate. But since that's a KeyError, we've always
+            # caught it and transformed the error message and type.
+            raise IntIdMissingError(ob)
 
     def queryId(self, ob, default=None):
         try:
@@ -131,10 +142,26 @@ class IntIds(Persistent):
         if key is None:
             return
 
-        uid = self.ids[key]
-        del self.refs[uid]
-        del self.ids[key]
+        # In theory, any of the KeyErrors we're catching here could be
+        # a ZODB POSKeyError if the ZODB and our BTrees are corrupt.
+        # We used to let those propagate (where they would probably be
+        # ignored, see removeIntIdSubscriber), but now we transform
+        # them and ignore that possibility because the chances of that
+        # happening are (probably) extremely remote.
 
+        try:
+            uid = self.ids[key]
+        except KeyError:
+            raise IntIdMissingError(ob)
+
+        try:
+            del self.refs[uid]
+        except KeyError:
+            # It was in self.ids, but not self.refs. Something is corrupted.
+            # We've always let this KeyError propagate, before cleaning up self.ids,
+            # meaning that getId(ob) will continue to work, but getObject(uid) will not.
+            raise IntIdsCorruptedError(ob, uid)
+        del self.ids[key]
 
 @adapter(ILocation, IObjectRemovedEvent)
 def removeIntIdSubscriber(ob, event):
@@ -154,6 +181,7 @@ def removeIntIdSubscriber(ob, event):
                 try:
                     utility.unregister(key)
                 except KeyError:
+                    # Silently ignoring corruption here
                     pass
 
 @adapter(ILocation, IObjectAddedEvent)

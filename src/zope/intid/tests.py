@@ -43,6 +43,7 @@ from zope.container.interfaces import ISimpleReadContainer
 
 from zope.intid import IntIds, intIdEventNotify
 from zope.intid.interfaces import IIntIds
+from zope.intid.interfaces import IntIdMissingError, IntIdsCorruptedError, ObjectMissingError
 
 
 # Local Utility Addition
@@ -125,7 +126,7 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
 
         self.assertTrue(u.queryId(obj) is None)
         self.assertTrue(u.unregister(obj) is None)
-        self.assertRaises(KeyError, u.getId, obj)
+        self.assertRaises(IntIdMissingError, u.getId, obj)
 
     def test(self):
         u = self.createIntIds()
@@ -133,18 +134,18 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
 
         obj._p_jar = ConnectionStub()
 
-        self.assertRaises(KeyError, u.getId, obj)
-        self.assertRaises(KeyError, u.getId, P())
+        self.assertRaises(IntIdMissingError, u.getId, obj)
+        self.assertRaises(IntIdMissingError, u.getId, P())
 
-        self.assertTrue(u.queryId(obj) is None)
-        self.assertTrue(u.queryId(obj, 42) is 42)
-        self.assertTrue(u.queryId(P(), 42) is 42)
-        self.assertTrue(u.queryObject(42) is None)
-        self.assertTrue(u.queryObject(42, obj) is obj)
+        self.assertIsNone(u.queryId(obj))
+        self.assertIs(u.queryId(obj, self), self)
+        self.assertIs(u.queryId(P(), self), self)
+        self.assertIsNone(u.queryObject(42))
+        self.assertIs(u.queryObject(42, obj), obj)
 
         uid = u.register(obj)
-        self.assertTrue(u.getObject(uid) is obj)
-        self.assertTrue(u.queryObject(uid) is obj)
+        self.assertIs(u.getObject(uid), obj)
+        self.assertIs(u.queryObject(uid), obj)
         self.assertEqual(u.getId(obj), uid)
         self.assertEqual(u.queryId(obj), uid)
 
@@ -152,8 +153,19 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         self.assertEqual(uid, uid2)
 
         u.unregister(obj)
-        self.assertRaises(KeyError, u.getObject, uid)
-        self.assertRaises(KeyError, u.getId, obj)
+        self.assertRaises(ObjectMissingError, u.getObject, uid)
+        self.assertRaises(IntIdMissingError, u.getId, obj)
+
+        # Unregistering again fails
+        self.assertRaises(IntIdMissingError, u.unregister, obj)
+
+        # Let's manually generate corruption
+        uid = u.register(obj)
+        del u.refs[uid]
+
+        self.assertRaises(IntIdsCorruptedError, u.unregister, obj)
+        # But we can still ask for its id
+        self.assertEqual(u.getId(obj), uid)
 
     def test_btree_long(self):
         # This is a somewhat arkward test, that *simulates* the border case
@@ -286,8 +298,8 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         # nearest one.
         removeIntIdSubscriber(folder, ObjectRemovedEvent(parent_folder))
 
-        self.assertRaises(KeyError, self.utility.getObject, id)
-        self.assertRaises(KeyError, self.utility1.getObject, id1)
+        self.assertRaises(ObjectMissingError, self.utility.getObject, id)
+        self.assertRaises(ObjectMissingError, self.utility1.getObject, id1)
 
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0].object, folder)

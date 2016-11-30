@@ -2,6 +2,23 @@
 """
 from zope.interface import Interface, Attribute, implementer
 
+class IntIdMissingError(KeyError):
+    """
+    Raised when ``getId`` cannot find an intid.
+    """
+
+class ObjectMissingError(KeyError):
+    """
+    Raised when ``getObject`` cannot find an object.
+    """
+
+class IntIdsCorruptedError(KeyError):
+    """
+    Raised when internal corruption is detected in the utility.
+
+    Users should not need to catch this because this situation should
+    not happen.
+    """
 
 class IIntIdsQuery(Interface):
     "Query for IDs and objects"
@@ -43,7 +60,7 @@ class IIntIdsSet(Interface):
     def unregister(ob):
         """Remove the object from the indexes.
 
-        KeyError is raised if ob is not registered previously.
+        IntIdMissingError is raised if ob is not registered previously.
         """
 
 class IIntIdsManage(Interface):
