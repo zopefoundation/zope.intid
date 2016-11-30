@@ -178,7 +178,7 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         self.assertEqual(maxint, uid)
         # Make an explicit tuple here to avoid implicit type casts
         # by the btree code
-        self.failUnless(maxint in tuple(u.refs.keys()))
+        self.assertIn(maxint, tuple(u.refs.keys()))
 
         # _v_nextid is now set to None, since the last id generated was
         # maxint.
@@ -188,7 +188,7 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         conn.add(obj)
         u._randrange = random.randrange
         uid = u.register(obj)
-        self.failUnless(uid < maxint)
+        self.assertLess(uid, maxint)
 
     def test_len_items(self):
         u = self.createIntIds()
