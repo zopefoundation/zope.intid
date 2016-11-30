@@ -73,6 +73,10 @@ class IntIds(Persistent):
         try:
             return self.refs[id]()
         except KeyError:
+            # In theory, if the ZODB and/or our self.ids BTree is
+            # corrupted, this could raise
+            # ZODB.POSException.POSKeyError. We used to propagate that
+            # but now we transform it.
             raise ObjectMissingError(id)
 
     def queryObject(self, id, default=None):
@@ -90,7 +94,7 @@ class IntIds(Persistent):
         try:
             return self.ids[key]
         except KeyError:
-            # In theory, if the ZODB and our self.ids BTree is
+            # In theory, if the ZODB and/or our self.ids BTree is
             # corrupted, this could raise
             # ZODB.POSException.POSKeyError, which we should probably
             # let propagate. But since that's a KeyError, we've always
