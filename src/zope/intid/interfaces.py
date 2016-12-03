@@ -4,6 +4,7 @@ from zope.interface import Interface, Attribute, implementer
 
 
 class IIntIdsQuery(Interface):
+    "Query for IDs and objects"
 
     def getObject(uid):
         """Return an object by its unique id"""
@@ -29,11 +30,12 @@ class IIntIdsQuery(Interface):
 
 
 class IIntIdsSet(Interface):
+    "Register and unregister objects."
 
     def register(ob):
         """Register an object and returns a unique id generated for it.
 
-        The object *must* be adaptable to IKeyReference.
+        The object *must* be adaptable to :class:`~zope.keyreference.interfaces.IKeyReference`.
 
         If the object is already registered, its id is returned anyway.
         """
