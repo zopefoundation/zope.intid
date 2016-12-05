@@ -22,7 +22,16 @@ import os
 from setuptools import setup, find_packages
 
 def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
+        return f.read()
+
+TESTS_REQUIRE = [
+    'ZODB',
+    'zope.testing',
+    'zope.site',
+    'zope.traversing',
+    'zope.container',
+]
 
 setup(name = 'zope.intid',
       version=read('version.txt').strip(),
@@ -60,14 +69,10 @@ setup(name = 'zope.intid',
       package_dir = {'': 'src'},
       namespace_packages=['zope'],
       extras_require = dict(
-        test=['zope.testing',
-              'zope.site',
-              'zope.traversing',
-              'zope.container',]),
+        test=TESTS_REQUIRE),
       install_requires = [
         'persistent',
         'BTrees',
-        'ZODB',
         'setuptools',
         'zope.lifecycleevent>=3.5.2',
         'zope.component',
@@ -77,12 +82,7 @@ setup(name = 'zope.intid',
         'zope.location>=3.5.4',
         'zope.security',
         ],
-      tests_require = [
-        'zope.testing',
-        'zope.site',
-        'zope.traversing',
-        'zope.container',
-        ],
+      tests_require = TESTS_REQUIRE,
       test_suite = 'zope.intid.tests.test_suite',
       include_package_data = True,
       zip_safe = False,
