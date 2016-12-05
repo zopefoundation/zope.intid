@@ -18,6 +18,8 @@ Changes
 
 - Drop support for Python 2.6.
 
+- Add support for PyPy3 5.2.
+
 - Stop depending on ZODB for anything except testing.
 
 4.1.0 (2014-12-27)
