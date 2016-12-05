@@ -21,6 +21,7 @@ import BTrees
 from persistent import Persistent
 from persistent.interfaces import IPersistent
 from ZODB.interfaces import IConnection
+from ZODB.POSException import POSKeyError
 from zope.component import getSiteManager
 from zope.component import provideAdapter
 from zope.component import provideHandler
@@ -44,7 +45,6 @@ from zope.container.interfaces import ISimpleReadContainer
 from zope.intid import IntIds, intIdEventNotify
 from zope.intid.interfaces import IIntIds
 from zope.intid.interfaces import IntIdMissingError, IntIdsCorruptedError, ObjectMissingError
-
 
 # Local Utility Addition
 def addUtility(sitemanager, name, iface, utility, suffix=''):
@@ -87,6 +87,13 @@ class ConnectionStub(object):
         ob._p_oid = struct.pack(">I", self.next)
         self.next += 1
 
+class POSKeyRaisingDict(object):
+
+    def __getitem__(self, i):
+        raise POSKeyError(i)
+
+    def __delitem__(self, i):
+        raise POSKeyError(i)
 
 class ReferenceSetupMixin(object):
     """Registers adapters ILocation->IConnection and IPersistent->IReference"""
@@ -115,7 +122,21 @@ class ReferenceSetupMixin(object):
 
 class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
 
-    createIntIds = IntIds
+    def setUp(self):
+        super(TestIntIds, self).setUp()
+        self.conn = ConnectionStub()
+
+    def tearDown(self):
+        self.conn = None
+        super(TestIntIds, self).tearDown()
+
+    def createIntIds(self):
+        return IntIds()
+
+    def _create_registered_obj(self):
+        obj = P()
+        self.conn.add(obj)
+        return obj
 
     def test_interface(self):
         verifyObject(IIntIds, self.createIntIds())
@@ -128,11 +149,37 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         self.assertTrue(u.unregister(obj) is None)
         self.assertRaises(IntIdMissingError, u.getId, obj)
 
-    def test(self):
+    def test_getObject_POSKeyError(self):
         u = self.createIntIds()
-        obj = P()
+        u.refs = POSKeyRaisingDict()
+        self.assertRaises(POSKeyError, u.getObject, 1)
 
-        obj._p_jar = ConnectionStub()
+    def test_getId_queryId_POSKeyError(self):
+        u = self.createIntIds()
+        u.ids = POSKeyRaisingDict()
+        obj = self._create_registered_obj()
+        self.assertRaises(POSKeyError, u.getId, obj)
+        self.assertRaises(POSKeyError, u.queryId, obj)
+
+    def test_unregister_POSKeyError_refs(self):
+        u = self.createIntIds()
+        obj = self._create_registered_obj()
+        u.register(obj)
+
+        u.refs = POSKeyRaisingDict()
+        self.assertRaises(POSKeyError, u.unregister, obj)
+
+    def test_unregister_POSKeyError_ids(self):
+        u = self.createIntIds()
+        obj = self._create_registered_obj()
+        u.register(obj)
+
+        u.ids = POSKeyRaisingDict()
+        self.assertRaises(POSKeyError, u.unregister, obj)
+
+    def test_general(self):
+        u = self.createIntIds()
+        obj = self._create_registered_obj()
 
         self.assertRaises(IntIdMissingError, u.getId, obj)
         self.assertRaises(IntIdMissingError, u.getId, P())
@@ -174,18 +221,16 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         maxint = u.family.maxint
         u._randrange = lambda x,y: maxint-1
 
-        conn = ConnectionStub()
+        obj = self._create_registered_obj()
 
-        obj = P()
-        conn.add(obj)
         uid = u.register(obj)
         self.assertEqual(maxint-1, uid)
         self.assertEqual(maxint, u._v_nextid)
 
         # The next chosen int is exactly the largest number possible that is
         # delivered by the randint call in the code
-        obj = P()
-        conn.add(obj)
+        obj = self._create_registered_obj()
+
         uid = u.register(obj)
         self.assertEqual(maxint, uid)
         # Make an explicit tuple here to avoid implicit type casts
@@ -196,16 +241,15 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         # maxint.
         self.assertEqual(u._v_nextid, None)
         # make sure the next uid generated is less than maxint
-        obj = P()
-        conn.add(obj)
+        obj = self._create_registered_obj()
+
         u._randrange = random.randrange
         uid = u.register(obj)
         self.assertLess(uid, maxint)
 
     def test_len_items(self):
         u = self.createIntIds()
-        obj = P()
-        obj._p_jar = ConnectionStub()
+        obj = self._create_registered_obj()
 
         self.assertEqual(len(u), 0)
         self.assertEqual(u.items(), [])
@@ -294,6 +338,10 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         provideHandler(events.append, [IIntIdRemovedEvent])
         provideHandler(appendObjectEvent, [IFolder, IIntIdRemovedEvent])
 
+        # Nothing happens for objects that can't be a keyreference
+        removeIntIdSubscriber(self, None)
+        self.assertEqual([], events)
+
         # This should unregister the object in all utilities, not just the
         # nearest one.
         removeIntIdSubscriber(folder, ObjectRemovedEvent(parent_folder))
@@ -309,6 +357,17 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         self.assertEqual(objevents[0][0], folder)
         self.assertEqual(objevents[0][1].object, folder)
         self.assertEqual(objevents[0][1].original_event.object, parent_folder)
+
+        # Removing again will produce key errors, but those don't
+        # propagate from the subscriber
+        del events[:]
+        del objevents[:]
+        self.assertRaises(IntIdMissingError, self.utility.unregister, parent_folder)
+
+        removeIntIdSubscriber(folder, ObjectRemovedEvent(parent_folder))
+        # Note that even though we didn't remove it, we still sent an event...
+        self.assertEqual(len(events), 1)
+
 
     def test_addIntIdSubscriber(self):
         from zope.lifecycleevent import ObjectAddedEvent
@@ -327,6 +386,11 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
 
         provideHandler(events.append, [IIntIdAddedEvent])
         provideHandler(appendObjectEvent, [IFolder, IIntIdAddedEvent])
+
+        # Nothing happens for objects that can't be a keyreference
+        addIntIdSubscriber(self, None)
+        self.assertEqual([], events)
+
 
         # This should register the object in all utilities, not just the
         # nearest one.
@@ -365,4 +429,4 @@ def test_suite():
     return suite
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(defaultTest='test_suite')

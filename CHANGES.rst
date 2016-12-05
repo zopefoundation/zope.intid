@@ -10,6 +10,10 @@ Changes
   testing or when persisting intids or sharing them among processes
   for later or concurrent use.
 
+- Propagate ``POSKeyError`` from ``queryId`` instead of returning the
+  default object. This exception indicates a corrupt database, not a
+  missing object. The ``queryObject`` function already behaved this way.
+
 - Add support for Python 3.5.
 
 - Drop support for Python 2.6.
