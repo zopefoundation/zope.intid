@@ -34,6 +34,20 @@ from zope.security.proxy import removeSecurityProxy
 
 from zope.intid.interfaces import IIntIds, IIntIdEvent
 from zope.intid.interfaces import IntIdAddedEvent, IntIdRemovedEvent
+from zope.intid.interfaces import IntIdMissingError, IntIdsCorruptedError, ObjectMissingError
+
+try:
+    # POSKeyError is a subclass of KeyError; in the cases where we
+    # catch KeyError for an item missing from a BTree, we still
+    # want to propagate this exception that indicates a corrupt database
+    # (as opposed to a corrupt IntIds)
+    from ZODB.POSException import POSKeyError as _POSKeyError
+except ImportError: # pragma: no cover (we run tests with ZODB installed)
+    # In practice, ZODB will probably be installed. But if not,
+    # then POSKeyError can never be generated, so use a unique
+    # exception that we'll never catch.
+    class _POSKeyError(BaseException):
+        pass
 
 @implementer(IIntIds, IContained)
 class IntIds(Persistent):
@@ -67,7 +81,12 @@ class IntIds(Persistent):
         return self.refs.iterkeys()
 
     def getObject(self, id):
-        return self.refs[id]()
+        try:
+            return self.refs[id]()
+        except _POSKeyError:
+            raise
+        except KeyError:
+            raise ObjectMissingError(id)
 
     def queryObject(self, id, default=None):
         r = self.refs.get(id)
@@ -79,16 +98,20 @@ class IntIds(Persistent):
         try:
             key = IKeyReference(ob)
         except (NotYet, TypeError, ValueError):
-            raise KeyError(ob)
+            raise IntIdMissingError(ob)
 
         try:
             return self.ids[key]
+        except _POSKeyError:
+            raise
         except KeyError:
-            raise KeyError(ob)
+            raise IntIdMissingError(ob)
 
     def queryId(self, ob, default=None):
         try:
             return self.getId(ob)
+        except _POSKeyError:
+            raise
         except KeyError:
             return default
 
@@ -131,10 +154,27 @@ class IntIds(Persistent):
         if key is None:
             return
 
-        uid = self.ids[key]
-        del self.refs[uid]
+        try:
+            uid = self.ids[key]
+        except _POSKeyError:
+            raise
+        except KeyError:
+            raise IntIdMissingError(ob)
+
+        try:
+            del self.refs[uid]
+        except _POSKeyError:
+            raise
+        except KeyError:
+            # It was in self.ids, but not self.refs. Something is corrupted.
+            # We've always let this KeyError propagate, before cleaning up self.ids,
+            # meaning that getId(ob) will continue to work, but getObject(uid) will not.
+            raise IntIdsCorruptedError(ob, uid)
         del self.ids[key]
 
+def _utilities_and_key(ob):
+    utilities = tuple(getAllUtilitiesRegisteredFor(IIntIds))
+    return utilities, IKeyReference(ob, None) if utilities else None
 
 @adapter(ILocation, IObjectRemovedEvent)
 def removeIntIdSubscriber(ob, event):
@@ -143,18 +183,18 @@ def removeIntIdSubscriber(ob, event):
     Removes the unique ids registered for the object in all the unique
     id utilities.
     """
-    utilities = tuple(getAllUtilitiesRegisteredFor(IIntIds))
-    if utilities:
-        key = IKeyReference(ob, None)
-        # Register only objects that adapt to key reference
-        if key is not None:
-            # Notify the catalogs that this object is about to be removed.
-            notify(IntIdRemovedEvent(ob, event))
-            for utility in utilities:
-                try:
-                    utility.unregister(key)
-                except KeyError:
-                    pass
+    utilities, key = _utilities_and_key(ob)
+    if not utilities or key is None:
+        # Unregister only objects that adapt to key reference
+        return
+    # Notify the catalogs that this object is about to be removed.
+    notify(IntIdRemovedEvent(ob, event))
+    for utility in utilities:
+        try:
+            utility.unregister(key)
+        except KeyError:
+            # Silently ignoring all kinds corruption here
+            pass
 
 @adapter(ILocation, IObjectAddedEvent)
 def addIntIdSubscriber(ob, event):
@@ -163,16 +203,15 @@ def addIntIdSubscriber(ob, event):
     Registers the object added in all unique id utilities and fires
     an event for the catalogs.
     """
-    utilities = tuple(getAllUtilitiesRegisteredFor(IIntIds))
-    if utilities: # assert that there are any utilites
-        key = IKeyReference(ob, None)
+    utilities, key = _utilities_and_key(ob)
+    if not utilities or key is None:
         # Register only objects that adapt to key reference
-        if key is not None:
-            idmap = {}
-            for utility in utilities:
-                idmap[utility] = utility.register(key)
-            # Notify the catalogs that this object was added.
-            notify(IntIdAddedEvent(ob, event, idmap))
+        return
+    idmap = {}
+    for utility in utilities:
+        idmap[utility] = utility.register(key)
+    # Notify the catalogs that this object was added.
+    notify(IntIdAddedEvent(ob, event, idmap))
 
 @adapter(IIntIdEvent)
 def intIdEventNotify(event):
