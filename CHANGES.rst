@@ -1,7 +1,7 @@
 Changes
 =======
 
-4.2.0 (unreleased)
+4.2.0 (2016-12-08)
 ------------------
 
 - Raise more informative KeyError subclasses from the utility when intids
