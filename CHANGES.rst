@@ -18,7 +18,7 @@ Changes
 
 - Add support for Python 3.5 and PyPy3 5.2.
 
-- Drop support for Python 2.6 and 3.2.
+- Drop support for Python 2.6.
 
 4.1.0 (2014-12-27)
 ------------------
