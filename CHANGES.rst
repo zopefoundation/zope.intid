@@ -14,13 +14,11 @@ Changes
   default object. This exception indicates a corrupt database, not a
   missing object. The ``queryObject`` function already behaved this way.
 
-- Add support for Python 3.5.
-
-- Drop support for Python 2.6.
-
-- Add support for PyPy3 5.2.
-
 - Stop depending on ZODB for anything except testing.
+
+- Add support for Python 3.5 and PyPy3 5.2.
+
+- Drop support for Python 2.6 and 3.2.
 
 4.1.0 (2014-12-27)
 ------------------
