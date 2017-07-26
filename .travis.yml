@@ -1,12 +1,17 @@
 language: python
 sudo: false
+# In July 2017, the default dist is changing slowly to
+# trusty (Ubuntu 14.04) from precise (Ubuntu 12.04). trusty
+# has newer pypy versions that aren't available on precise,
+# so for the time being we force that dist.
+dist: trusty
 python:
     - 2.7
     - 3.4
     - 3.5
     - 3.6
-    - pypy-5.6.0
-    - pypy3.3-5.5-alpha
+    - pypy # 5.8 in July 2017
+    - pypy3.5-5.8.0 # plain pypy3 is missing the activate script
 install:
     - pip install -U pip setuptools # need updated pip for caching
     - pip install -U coverage coveralls
