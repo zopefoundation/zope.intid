@@ -1,7 +1,7 @@
 ``zope.intid``
 ==============
 
-.. image:: https://travis-ci.org/zopefoundation/zope.intid.png?branch=master
+.. image:: https://travis-ci.org/zopefoundation/zope.intid.svg?branch=master
         :target: https://travis-ci.org/zopefoundation/zope.intid
 
 .. image:: https://readthedocs.org/projects/zopeintid/badge/?version=latest
