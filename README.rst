@@ -1,6 +1,14 @@
 ``zope.intid``
 ==============
 
+.. image:: https://img.shields.io/pypi/v/zope.intid.svg
+        :target: https://pypi.org/project/zope.intid/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.intid.svg
+        :target: https://pypi.org/project/zope.intid/
+        :alt: Supported Python versions
+        
 .. image:: https://travis-ci.org/zopefoundation/zope.intid.svg?branch=master
         :target: https://travis-ci.org/zopefoundation/zope.intid
 
