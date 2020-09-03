@@ -4,6 +4,8 @@ Changes
 4.4.0 (unreleased)
 ------------------
 
+- Fixed deprecation warning for zope.site.hooks in tests.
+
 - Add support for Python 3.7 and 3.8.
 
 - Drop support for Python 3.4.

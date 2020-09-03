@@ -33,7 +33,7 @@ from zope.keyreference.persistent import KeyReferenceToPersistent
 from zope.keyreference.persistent import connectionOfPersistent
 from zope.keyreference.interfaces import IKeyReference
 from zope.location.interfaces import ILocation
-from zope.site.hooks import setSite, setHooks, resetHooks
+from zope.component.hooks import setSite, setHooks, resetHooks
 from zope.site.folder import rootFolder
 from zope.site.site import SiteManagerAdapter, LocalSiteManager
 from zope.traversing import api
