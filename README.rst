@@ -9,8 +9,8 @@
         :target: https://pypi.org/project/zope.intid/
         :alt: Supported Python versions
         
-.. image:: https://travis-ci.org/zopefoundation/zope.intid.svg?branch=master
-        :target: https://travis-ci.org/zopefoundation/zope.intid
+.. image:: https://travis-ci.com/zopefoundation/zope.intid.svg?branch=master
+        :target: https://travis-ci.com/zopefoundation/zope.intid
 
 .. image:: https://readthedocs.org/projects/zopeintid/badge/?version=latest
          :target: http://zopeintid.readthedocs.io/en/latest/?badge=latest
