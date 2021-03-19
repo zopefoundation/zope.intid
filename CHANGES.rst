@@ -2,7 +2,7 @@
  Changes
 =========
 
-4.4.0 (unreleased)
+4.4.0 (2021-03-19)
 ==================
 
 - Fixed deprecation warning for ``zope.site.hooks`` in tests.
