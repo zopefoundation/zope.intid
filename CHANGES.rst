@@ -1,18 +1,21 @@
-Changes
-=======
+=========
+ Changes
+=========
 
 4.4.0 (unreleased)
-------------------
+==================
 
-- Fixed deprecation warning for zope.site.hooks in tests.
+- Fixed deprecation warning for ``zope.site.hooks`` in tests.
 
 - Add support for Python 3.7 and 3.8.
 
 - Drop support for Python 3.4.
 
+- Fix incorrect import of
+  ``zope.interface.interfaces.IComponentLookup`` in tests.
 
 4.3.0 (2017-07-26)
-------------------
+==================
 
 - Add support for Python 3.6.
 
@@ -20,7 +23,7 @@ Changes
 
 
 4.2.0 (2016-12-08)
-------------------
+==================
 
 - Raise more informative KeyError subclasses from the utility when intids
   or objects cannot be found. This distinguishes them from errors
@@ -39,7 +42,7 @@ Changes
 - Drop support for Python 2.6.
 
 4.1.0 (2014-12-27)
-------------------
+==================
 
 - Add support for PyPy (PyPy3 blocked on PyPy3-compatible ``zodbpickle``).
 
@@ -47,13 +50,13 @@ Changes
 
 
 4.0.0 (2014-12-20)
-------------------
+==================
 
 - Add support for testing on Travis.
 
 
 4.0.0a1 (2013-02-22)
---------------------
+====================
 
 - Add support for Python 3.3.
 
@@ -66,14 +69,14 @@ Changes
   than the maxint of the BTree family being used.
 
 3.7.2 (2009-12-27)
-------------------
+==================
 
 - Use the zope.component API in favor of ztapi.
 
 - Remove ``zope.app.testing`` dependency.
 
 3.7.1 (2009-05-18)
-------------------
+==================
 
 - Remove dependencies on ``zope.container``.  Instead import
   ``Object*Event`` classes from ``zope.lifecycleevent`` and import
@@ -86,7 +89,7 @@ Changes
   as None and declares that the class implements IContained).
 
 3.7.0 (2009-02-01)
-------------------
+==================
 
 - Split out this package from ``zope.app.intid``. The latter one
   now only contains browser views and compatibility imports while

@@ -26,8 +26,9 @@ from zope.component import getSiteManager
 from zope.component import provideAdapter
 from zope.component import provideHandler
 from zope.component import testing, eventtesting
-from zope.component.interfaces import ISite, IComponentLookup
+from zope.component.interfaces import ISite
 from zope.interface import implementer, Interface
+from zope.interface.interfaces import IComponentLookup
 from zope.interface.verify import verifyObject
 from zope.keyreference.persistent import KeyReferenceToPersistent
 from zope.keyreference.persistent import connectionOfPersistent
