@@ -19,7 +19,9 @@
 """Setup for zope.intid package
 """
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages
+from setuptools import setup
 
 
 def read(*rnames):
@@ -74,22 +76,27 @@ setup(name='zope.intid',
       package_dir={'': 'src'},
       namespace_packages=['zope'],
       extras_require={
-        'test': TESTS_REQUIRE,
+          'test': TESTS_REQUIRE,
+          'docs': [
+              'repoze.sphinx.autointerface',
+              'sphinx_rtd_theme',
+              'Sphinx',
+          ],
       },
       install_requires=[
-        'persistent',
-        'BTrees',
-        'setuptools',
-        'zope.lifecycleevent>=3.5.2',
-        'zope.component',
-        'zope.event',
-        'zope.interface',
-        'zope.keyreference',
-        'zope.location>=3.5.4',
-        'zope.security',
+          'persistent',
+          'BTrees',
+          'setuptools',
+          'zope.lifecycleevent>=3.5.2',
+          'zope.component',
+          'zope.event',
+          'zope.interface',
+          'zope.keyreference',
+          'zope.location>=3.5.4',
+          'zope.security',
       ],
       tests_require=TESTS_REQUIRE,
       test_suite='zope.intid.tests.test_suite',
       include_package_data=True,
       zip_safe=False,
-)
+      )

@@ -22,30 +22,39 @@ from persistent import Persistent
 from persistent.interfaces import IPersistent
 from ZODB.interfaces import IConnection
 from ZODB.POSException import POSKeyError
+from zope.component import eventtesting
 from zope.component import getSiteManager
 from zope.component import provideAdapter
 from zope.component import provideHandler
-from zope.component import testing, eventtesting
+from zope.component import testing
+from zope.component.hooks import resetHooks
+from zope.component.hooks import setHooks
+from zope.component.hooks import setSite
 from zope.component.interfaces import ISite
-from zope.interface import implementer, Interface
+from zope.container.interfaces import ISimpleReadContainer
+from zope.container.traversal import ContainerTraversable
+from zope.interface import Interface
+from zope.interface import implementer
 from zope.interface.interfaces import IComponentLookup
 from zope.interface.verify import verifyObject
+from zope.keyreference.interfaces import IKeyReference
 from zope.keyreference.persistent import KeyReferenceToPersistent
 from zope.keyreference.persistent import connectionOfPersistent
-from zope.keyreference.interfaces import IKeyReference
 from zope.location.interfaces import ILocation
-from zope.component.hooks import setSite, setHooks, resetHooks
 from zope.site.folder import rootFolder
-from zope.site.site import SiteManagerAdapter, LocalSiteManager
+from zope.site.site import LocalSiteManager
+from zope.site.site import SiteManagerAdapter
 from zope.traversing import api
-from zope.traversing.testing import setUp as traversingSetUp
 from zope.traversing.interfaces import ITraversable
-from zope.container.traversal import ContainerTraversable
-from zope.container.interfaces import ISimpleReadContainer
+from zope.traversing.testing import setUp as traversingSetUp
 
-from zope.intid import IntIds, intIdEventNotify
+from zope.intid import IntIds
+from zope.intid import intIdEventNotify
 from zope.intid.interfaces import IIntIds
-from zope.intid.interfaces import IntIdMissingError, IntIdsCorruptedError, ObjectMissingError
+from zope.intid.interfaces import IntIdMissingError
+from zope.intid.interfaces import IntIdsCorruptedError
+from zope.intid.interfaces import ObjectMissingError
+
 
 # Local Utility Addition
 def addUtility(sitemanager, name, iface, utility, suffix=''):
@@ -88,6 +97,7 @@ class ConnectionStub(object):
         ob._p_oid = struct.pack(">I", self.next)
         self.next += 1
 
+
 class POSKeyRaisingDict(object):
 
     def __getitem__(self, i):
@@ -95,6 +105,7 @@ class POSKeyRaisingDict(object):
 
     def __delitem__(self, i):
         raise POSKeyError(i)
+
 
 class ReferenceSetupMixin(object):
     """Registers adapters ILocation->IConnection and IPersistent->IReference"""
@@ -220,12 +231,12 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         # behaviour of the _generateId method
         u = self.createIntIds()
         maxint = u.family.maxint
-        u._randrange = lambda x,y: maxint-1
+        u._randrange = lambda x, y: maxint - 1
 
         obj = self._create_registered_obj()
 
         uid = u.register(obj)
-        self.assertEqual(maxint-1, uid)
+        self.assertEqual(maxint - 1, uid)
         self.assertEqual(maxint, u._v_nextid)
 
         # The next chosen int is exactly the largest number possible that is
@@ -319,9 +330,10 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
 
     def test_removeIntIdSubscriber(self):
         from zope.lifecycleevent import ObjectRemovedEvent
+        from zope.site.interfaces import IFolder
+
         from zope.intid import removeIntIdSubscriber
         from zope.intid.interfaces import IIntIdRemovedEvent
-        from zope.site.interfaces import IFolder
         parent_folder = self.root['folder1']['folder1_1']
         folder = self.root['folder1']['folder1_1']['folder1_1_1']
         id = self.utility.register(folder)
@@ -363,18 +375,21 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         # propagate from the subscriber
         del events[:]
         del objevents[:]
-        self.assertRaises(IntIdMissingError, self.utility.unregister, parent_folder)
+        self.assertRaises(
+            IntIdMissingError,
+            self.utility.unregister,
+            parent_folder)
 
         removeIntIdSubscriber(folder, ObjectRemovedEvent(parent_folder))
         # Note that even though we didn't remove it, we still sent an event...
         self.assertEqual(len(events), 1)
 
-
     def test_addIntIdSubscriber(self):
         from zope.lifecycleevent import ObjectAddedEvent
+        from zope.site.interfaces import IFolder
+
         from zope.intid import addIntIdSubscriber
         from zope.intid.interfaces import IIntIdAddedEvent
-        from zope.site.interfaces import IFolder
         parent_folder = self.root['folder1']['folder1_1']
         folder = self.root['folder1']['folder1_1']['folder1_1_1']
         setSite(self.folder1_1)
@@ -391,7 +406,6 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         # Nothing happens for objects that can't be a keyreference
         addIntIdSubscriber(self, None)
         self.assertEqual([], events)
-
 
         # This should register the object in all utilities, not just the
         # nearest one.
@@ -416,6 +430,7 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         self.assertEqual(idmap[self.utility], id)
         self.assertEqual(idmap[self.utility1], id1)
 
+
 class TestIntIds64(TestIntIds):
 
     def createIntIds(self):
@@ -428,6 +443,3 @@ def test_suite():
     suite.addTest(unittest.makeSuite(TestIntIds64))
     suite.addTest(unittest.makeSuite(TestSubscribers))
     return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
