@@ -105,7 +105,7 @@ class IIntIdRemovedEvent(IIntIdEvent):
 
 
 @implementer(IIntIdRemovedEvent)
-class IntIdRemovedEvent(object):
+class IntIdRemovedEvent:
     """The event which is published before the unique id is removed
     from the utility so that the catalogs can unindex the object.
     """
@@ -127,7 +127,7 @@ class IIntIdAddedEvent(IIntIdEvent):
 
 
 @implementer(IIntIdAddedEvent)
-class IntIdAddedEvent(object):
+class IntIdAddedEvent:
     """The event which gets sent when an object is registered in a
     unique id utility.
     """

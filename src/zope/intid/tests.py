@@ -84,7 +84,7 @@ class P(Persistent):
     pass
 
 
-class ConnectionStub(object):
+class ConnectionStub:
     next = 1
 
     def db(self):
@@ -98,7 +98,7 @@ class ConnectionStub(object):
         self.next += 1
 
 
-class POSKeyRaisingDict(object):
+class POSKeyRaisingDict:
 
     def __getitem__(self, i):
         raise POSKeyError(i)
@@ -107,7 +107,7 @@ class POSKeyRaisingDict(object):
         raise POSKeyError(i)
 
 
-class ReferenceSetupMixin(object):
+class ReferenceSetupMixin:
     """Registers adapters ILocation->IConnection and IPersistent->IReference"""
 
     def setUp(self):
@@ -135,12 +135,12 @@ class ReferenceSetupMixin(object):
 class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
 
     def setUp(self):
-        super(TestIntIds, self).setUp()
+        super().setUp()
         self.conn = ConnectionStub()
 
     def tearDown(self):
         self.conn = None
-        super(TestIntIds, self).tearDown()
+        super().tearDown()
 
     def createIntIds(self):
         return IntIds()
@@ -439,7 +439,9 @@ class TestIntIds64(TestIntIds):
 
 def test_suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(TestIntIds))
-    suite.addTest(unittest.makeSuite(TestIntIds64))
-    suite.addTest(unittest.makeSuite(TestSubscribers))
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestIntIds))
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(
+        TestIntIds64))
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(
+        TestSubscribers))
     return suite

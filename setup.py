@@ -12,7 +12,7 @@
 #
 ##############################################################################
 # This package is developed by the Zope Toolkit project, documented here:
-# http://docs.zope.org/zopetoolkit
+# https://zopetoolkit.readthedocs.io/
 # When developing and releasing this package, please follow the documented
 # Zope Toolkit policies as described by this documentation.
 ##############################################################################
@@ -40,9 +40,9 @@ TESTS_REQUIRE = [
 setup(name='zope.intid',
       version=read('version.txt').strip(),
       author='Albertas Agejevas and Gintautas Miliauskas',
-      author_email='zope-dev@zope.org',
+      author_email='zope-dev@zope.dev',
       maintainer='Zope developers',
-      maintainer_email='zope-dev@zope.org',
+      maintainer_email='zope-dev@zope.dev',
       description='Integer Id Utility',
       long_description=(
           read('README.rst')
@@ -74,6 +74,7 @@ setup(name='zope.intid',
       packages=find_packages('src'),
       package_dir={'': 'src'},
       namespace_packages=['zope'],
+      python_requires='>=3.7',
       extras_require={
           'test': TESTS_REQUIRE,
           'docs': [
@@ -94,8 +95,6 @@ setup(name='zope.intid',
           'zope.location>=3.5.4',
           'zope.security',
       ],
-      tests_require=TESTS_REQUIRE,
-      test_suite='zope.intid.tests.test_suite',
       include_package_data=True,
       zip_safe=False,
       )
