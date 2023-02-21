@@ -22,19 +22,27 @@ import random
 
 import BTrees
 from persistent import Persistent
-from zope.component import adapter, getAllUtilitiesRegisteredFor, handle
+from zope.component import adapter
+from zope.component import getAllUtilitiesRegisteredFor
+from zope.component import handle
 from zope.event import notify
 from zope.interface import implementer
-from zope.keyreference.interfaces import IKeyReference, NotYet
+from zope.keyreference.interfaces import IKeyReference
+from zope.keyreference.interfaces import NotYet
 from zope.lifecycleevent.interfaces import IObjectAddedEvent
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
-from zope.location.interfaces import ILocation
 from zope.location.interfaces import IContained
+from zope.location.interfaces import ILocation
 from zope.security.proxy import removeSecurityProxy
 
-from zope.intid.interfaces import IIntIds, IIntIdEvent
-from zope.intid.interfaces import IntIdAddedEvent, IntIdRemovedEvent
-from zope.intid.interfaces import IntIdMissingError, IntIdsCorruptedError, ObjectMissingError
+from zope.intid.interfaces import IIntIdEvent
+from zope.intid.interfaces import IIntIds
+from zope.intid.interfaces import IntIdAddedEvent
+from zope.intid.interfaces import IntIdMissingError
+from zope.intid.interfaces import IntIdRemovedEvent
+from zope.intid.interfaces import IntIdsCorruptedError
+from zope.intid.interfaces import ObjectMissingError
+
 
 try:
     # POSKeyError is a subclass of KeyError; in the cases where we
@@ -42,12 +50,13 @@ try:
     # want to propagate this exception that indicates a corrupt database
     # (as opposed to a corrupt IntIds)
     from ZODB.POSException import POSKeyError as _POSKeyError
-except ImportError: # pragma: no cover (we run tests with ZODB installed)
+except ImportError:  # pragma: no cover
     # In practice, ZODB will probably be installed. But if not,
     # then POSKeyError can never be generated, so use a unique
     # exception that we'll never catch.
     class _POSKeyError(BaseException):
         pass
+
 
 @implementer(IIntIds, IContained)
 class IntIds(Persistent):
@@ -167,14 +176,17 @@ class IntIds(Persistent):
             raise
         except KeyError:
             # It was in self.ids, but not self.refs. Something is corrupted.
-            # We've always let this KeyError propagate, before cleaning up self.ids,
-            # meaning that getId(ob) will continue to work, but getObject(uid) will not.
+            # We've always let this KeyError propagate, before cleaning up
+            # self.ids, meaning that getId(ob) will continue to work, but
+            # getObject(uid) will not.
             raise IntIdsCorruptedError(ob, uid)
         del self.ids[key]
+
 
 def _utilities_and_key(ob):
     utilities = tuple(getAllUtilitiesRegisteredFor(IIntIds))
     return utilities, IKeyReference(ob, None) if utilities else None
+
 
 @adapter(ILocation, IObjectRemovedEvent)
 def removeIntIdSubscriber(ob, event):
@@ -196,6 +208,7 @@ def removeIntIdSubscriber(ob, event):
             # Silently ignoring all kinds corruption here
             pass
 
+
 @adapter(ILocation, IObjectAddedEvent)
 def addIntIdSubscriber(ob, event):
     """A subscriber to ObjectAddedEvent
@@ -212,6 +225,7 @@ def addIntIdSubscriber(ob, event):
         idmap[utility] = utility.register(key)
     # Notify the catalogs that this object was added.
     notify(IntIdAddedEvent(ob, event, idmap))
+
 
 @adapter(IIntIdEvent)
 def intIdEventNotify(event):

@@ -1,16 +1,21 @@
 """Interfaces for the unique id utility.
 """
-from zope.interface import Interface, Attribute, implementer
+from zope.interface import Attribute
+from zope.interface import Interface
+from zope.interface import implementer
+
 
 class IntIdMissingError(KeyError):
     """
     Raised when ``getId`` cannot find an intid.
     """
 
+
 class ObjectMissingError(KeyError):
     """
     Raised when ``getObject`` cannot find an object.
     """
+
 
 class IntIdsCorruptedError(KeyError):
     """
@@ -19,6 +24,7 @@ class IntIdsCorruptedError(KeyError):
     Users should not need to catch this because this situation should
     not happen.
     """
+
 
 class IIntIdsQuery(Interface):
     "Query for IDs and objects"
@@ -52,7 +58,8 @@ class IIntIdsSet(Interface):
     def register(ob):
         """Register an object and returns a unique id generated for it.
 
-        The object *must* be adaptable to :class:`~zope.keyreference.interfaces.IKeyReference`.
+        The object *must* be adaptable to
+        :class:`~zope.keyreference.interfaces.IKeyReference`.
 
         If the object is already registered, its id is returned anyway.
         """
@@ -62,6 +69,7 @@ class IIntIdsSet(Interface):
 
         IntIdMissingError is raised if ob is not registered previously.
         """
+
 
 class IIntIdsManage(Interface):
     """Some methods used by the view."""
@@ -97,7 +105,7 @@ class IIntIdRemovedEvent(IIntIdEvent):
 
 
 @implementer(IIntIdRemovedEvent)
-class IntIdRemovedEvent(object):
+class IntIdRemovedEvent:
     """The event which is published before the unique id is removed
     from the utility so that the catalogs can unindex the object.
     """
@@ -114,11 +122,12 @@ class IIntIdAddedEvent(IIntIdEvent):
     unique id utility.
     """
 
-    idmap = Attribute("The dictionary that holds an (utility -> id) mapping of created ids")
+    idmap = Attribute(
+        "The dictionary that holds an (utility -> id) mapping of created ids")
 
 
 @implementer(IIntIdAddedEvent)
-class IntIdAddedEvent(object):
+class IntIdAddedEvent:
     """The event which gets sent when an object is registered in a
     unique id utility.
     """

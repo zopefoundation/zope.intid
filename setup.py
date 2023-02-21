@@ -12,14 +12,16 @@
 #
 ##############################################################################
 # This package is developed by the Zope Toolkit project, documented here:
-# http://docs.zope.org/zopetoolkit
+# https://zopetoolkit.readthedocs.io/
 # When developing and releasing this package, please follow the documented
 # Zope Toolkit policies as described by this documentation.
 ##############################################################################
 """Setup for zope.intid package
 """
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages
+from setuptools import setup
 
 
 def read(*rnames):
@@ -38,9 +40,9 @@ TESTS_REQUIRE = [
 setup(name='zope.intid',
       version=read('version.txt').strip(),
       author='Albertas Agejevas and Gintautas Miliauskas',
-      author_email='zope-dev@zope.org',
+      author_email='zope-dev@zope.dev',
       maintainer='Zope developers',
-      maintainer_email='zope-dev@zope.org',
+      maintainer_email='zope-dev@zope.dev',
       description='Integer Id Utility',
       long_description=(
           read('README.rst')
@@ -54,13 +56,12 @@ setup(name='zope.intid',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: Zope Public License',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
+          'Programming Language :: Python :: 3.10',
+          'Programming Language :: Python :: 3.11',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
@@ -73,23 +74,27 @@ setup(name='zope.intid',
       packages=find_packages('src'),
       package_dir={'': 'src'},
       namespace_packages=['zope'],
+      python_requires='>=3.7',
       extras_require={
-        'test': TESTS_REQUIRE,
+          'test': TESTS_REQUIRE,
+          'docs': [
+              'repoze.sphinx.autointerface',
+              'sphinx_rtd_theme',
+              'Sphinx',
+          ],
       },
       install_requires=[
-        'persistent',
-        'BTrees',
-        'setuptools',
-        'zope.lifecycleevent>=3.5.2',
-        'zope.component',
-        'zope.event',
-        'zope.interface',
-        'zope.keyreference',
-        'zope.location>=3.5.4',
-        'zope.security',
+          'persistent',
+          'BTrees',
+          'setuptools',
+          'zope.lifecycleevent>=3.5.2',
+          'zope.component',
+          'zope.event',
+          'zope.interface',
+          'zope.keyreference',
+          'zope.location>=3.5.4',
+          'zope.security',
       ],
-      tests_require=TESTS_REQUIRE,
-      test_suite='zope.intid.tests.test_suite',
       include_package_data=True,
       zip_safe=False,
-)
+      )

@@ -1,14 +1,15 @@
+# Generated from:
+# https://github.com/zopefoundation/meta/tree/master/config/pure-python
+include *.md
 include *.rst
 include *.txt
-include *.py
 include buildout.cfg
 include tox.ini
-include .coveragerc
 
-recursive-include src *
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs *.txt
+recursive-include docs Makefile
 
-recursive-include doc *.py
-recursive-include doc *.rst
-recursive-include doc Makefile
-
-global-exclude *.pyc
+recursive-include src *.py
+recursive-include src *.zcml
