@@ -157,8 +157,8 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         u = self.createIntIds()
         obj = object()
 
-        self.assertTrue(u.queryId(obj) is None)
-        self.assertTrue(u.unregister(obj) is None)
+        self.assertIsNone(u.queryId(obj))
+        self.assertIsNone(u.unregister(obj))
         self.assertRaises(IntIdMissingError, u.getId, obj)
 
     def test_getObject_POSKeyError(self):
@@ -299,7 +299,7 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         u = self.createIntIds()
         self.assertEqual(u._v_nextid, None)
         id1 = u._generateId()
-        self.assertTrue(u._v_nextid is not None)
+        self.assertIsNotNone(u._v_nextid)
         id2 = u._generateId()
         self.assertTrue(id1 + 1, id2)
         u.refs[id2 + 1] = "Taken"
@@ -425,7 +425,7 @@ class TestSubscribers(ReferenceSetupMixin, unittest.TestCase):
         self.assertEqual(objevents[0][0], folder)
 
         idmap = events[0].idmap
-        self.assertTrue(idmap is objevents[0][1].idmap)
+        self.assertIs(idmap, objevents[0][1].idmap)
         self.assertEqual(len(idmap), 2)
         self.assertEqual(idmap[self.utility], id)
         self.assertEqual(idmap[self.utility1], id1)
