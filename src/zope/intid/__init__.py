@@ -50,7 +50,7 @@ try:
     # want to propagate this exception that indicates a corrupt database
     # (as opposed to a corrupt IntIds)
     from ZODB.POSException import POSKeyError as _POSKeyError
-except ImportError:  # pragma: no cover
+except ModuleNotFoundError:  # pragma: no cover
     # In practice, ZODB will probably be installed. But if not,
     # then POSKeyError can never be generated, so use a unique
     # exception that we'll never catch.
