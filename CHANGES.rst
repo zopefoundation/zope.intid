@@ -5,7 +5,10 @@
 6.1 (unreleased)
 ================
 
-- Nothing changed yet.
+- ``IntIds.getObject`` no longer lets a raw ``AttributeError`` escape
+  when a key reference cannot resolve its object. It is now reported
+  as ``ObjectMissingError``, like any other missing object.
+  (`#19 <https://github.com/zopefoundation/zope.intid/issues/19>`_)
 
 
 6.0 (2025-09-12)

@@ -96,6 +96,14 @@ class IntIds(Persistent):
             raise
         except KeyError:
             raise ObjectMissingError(id)
+        except AttributeError:
+            # A key reference can raise this instead of KeyError if,
+            # for whatever reason, it is no longer able to resolve the
+            # object it was created for (e.g. its own state is stale
+            # or incomplete). Treat it the same as a missing object
+            # instead of letting it escape as a confusing raw
+            # AttributeError.
+            raise ObjectMissingError(id)
 
     def queryObject(self, id, default=None):
         r = self.refs.get(id)

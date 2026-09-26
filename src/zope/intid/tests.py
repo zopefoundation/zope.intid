@@ -107,6 +107,16 @@ class POSKeyRaisingDict:
         raise POSKeyError(i)
 
 
+class _BrokenKeyReference:
+    """A stand-in for a key reference that can no longer resolve the
+    object it was created for and raises AttributeError instead of
+    just being absent from the mapping.
+    """
+
+    def __call__(self):
+        raise AttributeError('object')
+
+
 class ReferenceSetupMixin:
     """Registers adapters ILocation->IConnection and IPersistent->IReference"""
 
@@ -165,6 +175,17 @@ class TestIntIds(ReferenceSetupMixin, unittest.TestCase):
         u = self.createIntIds()
         u.refs = POSKeyRaisingDict()
         self.assertRaises(POSKeyError, u.getObject, 1)
+
+    def test_getObject_AttributeError(self):
+        # A key reference whose __call__ raises AttributeError (for
+        # example because its own persistent state is stale or
+        # otherwise unable to resolve the referenced object) should
+        # be reported the same way as a plain missing entry, not leak
+        # out as a raw AttributeError.
+        u = self.createIntIds()
+        uid = 1
+        u.refs[uid] = _BrokenKeyReference()
+        self.assertRaises(ObjectMissingError, u.getObject, uid)
 
     def test_getId_queryId_POSKeyError(self):
         u = self.createIntIds()
