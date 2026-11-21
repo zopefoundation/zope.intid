@@ -37,7 +37,7 @@ TESTS_REQUIRE = [
 ]
 
 setup(name='zope.intid',
-      version=read('version.txt').strip(),
+      version='6.1.dev0',
       author='Albertas Agejevas and Gintautas Miliauskas',
       author_email='zope-dev@zope.dev',
       maintainer='Zope developers',
