@@ -18,26 +18,8 @@
 ##############################################################################
 """Setup for zope.intid package
 """
-import os
-
 from setuptools import setup
 
 
-def read(*rnames):
-    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
-        return f.read()
-
-
-TESTS_REQUIRE = [
-    'ZODB',
-    'zope.testing',
-    'zope.site',
-    'zope.traversing',
-    'zope.container',
-]
-
 # See pyproject.toml for package metadata
-setup(
-    maintainer=Zope developers,
-    maintainer_email=zope - dev @ zope.dev,
-)
+setup()
