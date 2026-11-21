@@ -39,5 +39,5 @@ TESTS_REQUIRE = [
 # See pyproject.toml for package metadata
 setup(
     maintainer=Zope developers,
-    maintainer_email=zope-dev@zope.dev,
+    maintainer_email=zope - dev @ zope.dev,
 )
