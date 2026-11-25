@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zope.intid"
-version = "6.1.dev0"
+version = "6.1"
 description = "Integer Id Utility"
 license = "ZPL-2.1"
 classifiers = [
